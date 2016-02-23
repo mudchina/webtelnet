@@ -1,0 +1,43 @@
+{
+  "name": "webtelnet",
+  "version": "0.1.0",
+  "description": "web to telnet bridge/proxy, enable playing MUD game with broswer",
+  "main": "./src/webtelnet.js",
+  "bin": {
+    "webtelnet": "./src/main.js"
+  },
+  "scripts": {
+    "start": "node ./src/main.js",
+    "debug": "node --debug ./src/main.js",
+    "clean": "rm -rf dist",
+    "test": "for i in $(ls src/tests/); do node \"src/tests/${i}\" | faucet ; done",
+    "validate": "npm run lint; npm run test && npm outdated --depth 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mudchina/webtelnet.git"
+  },
+  "keywords": [
+    "telnet",
+    "webtelnet",
+    "mud",
+    "webmud"
+  ],
+  "author": "Raymond Xie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mudchina/webtelnet/issues"
+  },
+  "homepage": "https://github.com/mudchina/webtelnet#README.md",
+  "dependencies": {
+    "express": "^4.13.4",
+    "minimist": "^1.2.0",
+    "mixin-pro": "^0.6.6",
+    "socket.io": "^1.4.4",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "tape": "^4.4.0"
+  }
+}

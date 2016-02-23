@@ -1,0 +1,29 @@
+div#output { 
+  margin: 0px;
+  width: 800px;
+  height: 800px;
+  overflow-y: scroll; 
+  overflow-x: scroll; 
+  font-size: 18px; 
+  line-height: 100%;
+  border: 1px solid black; 
+  background-color: black;
+}
+
+span.output {
+  white-space:pre; 
+  font-family: SimSun;
+  color: green; 
+  background-color: black; 
+}
+
+p {
+  margin: 5px;
+}
+
+span.cmd {
+  white-space:pre; 
+  font-family: SimSun;
+  color: white; 
+  background-color: black; 
+}
