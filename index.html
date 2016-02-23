@@ -92,10 +92,15 @@
         //上一次残留的信息还没换行
         var lastMsg = ""
 
+        var websocket_proxy = "ws://182.254.151.171:9997/pp";
+        var mud_url = "112.124.8.59:6666";
+
         function connectServer() {
+            mud_url = document.getElementById("mud_url").value;
+
             if (window.WebSocket) {
                 // socket = new WebSocket("ws://192.168.2.239:9997/pp");
-                socket = new WebSocket("ws://182.254.151.171:9997/pp");
+                socket = new WebSocket(websocket_proxy);
                 socket.onmessage = function(event) {
                     if(typeof(event.data)=="string") {
                         var obj = eval('(' + event.data +')');
@@ -134,26 +139,26 @@
                 };
                 socket.onopen = function(event) {
                     writeToScreen("CONNECTED");
-                    // document.getElementById("connect").disabled=true;
-                    // document.getElementById("disconnect").disabled=false;
-                    socket.send("112.124.8.59:6666");//pm
+                    document.getElementById("connect").disabled=true;
+                    document.getElementById("disconnect").disabled=false;
+                    socket.send(mud_url);//pm
                 };
                 socket.onclose = function(event) {                    
                     writeToScreen("DISCONNECTED");
-                    // document.getElementById("connect").disabled=false;
-                    // document.getElementById("disconnect").disabled=true;
+                    document.getElementById("connect").disabled=false;
+                    document.getElementById("disconnect").disabled=true;
                     connectServer();
                 };
             } else {
                 alert("你的浏览器不支持websocket，使用火狐或者谷歌浏览器！");
             }
         }
-        // function disconnectServer() {
-        //     socket.close();
-        //     writeToScreen("DISCONNECTED");            
-        //     //document.getElementById("connect").disabled=false;
-        //     //document.getElementById("disconnect").disabled=true;
-        // }
+        function disconnectServer() {
+            socket.close();
+            writeToScreen("DISCONNECTED");
+            document.getElementById("connect").disabled=false;
+            document.getElementById("disconnect").disabled=true;
+        }
  
         function send(message) {
             if (!window.WebSocket) {
@@ -186,7 +191,8 @@
             output.appendChild(pre);
             output.scrollTop = output.scrollHeight;
         }
-        connectServer();        
+        // XXX: uncomment to auto connect
+        // connectServer();
     </script>
     <form onsubmit="return false;">
         <table border="0">
@@ -198,9 +204,20 @@
             </tr>
             <td>
                 <table>
+                    <tr>
+                      <td>
+                        MUD网址：<input type="text" size="50" name="mud_url" id="mud_url" value="112.124.8.59:6666"/>
+                      </td>
+                        <td>
+                            <input id="connect" type="button" onclick="connectServer()" value="连接">
+                        </td>
+                        <td>
+                            <input id="disconnect" type="button" onclick="disconnectServer()" disabled="true" value="断开">
+                        </td>
+                  </tr>
                     <tr>                        
                         <td>
-                        <input type="text" size="50" name="message200" value="" onkeypress="if(event.keyCode==13) {send(this.value);this.setSelectionRange(0, this.value.length);return false;}" autofocus >
+                        发送指令：<input type="text" size="50" name="message200" value="" onkeypress="if(event.keyCode==13) {send(this.value);this.setSelectionRange(0, this.value.length);return false;}" autofocus >
                         </td>
                         <td>
                         <input
@@ -210,12 +227,6 @@
                         <td>
                             <input type="button" onclick="javascript:document.getElementById('output').innerHTML=''" value="清空">
                         </td>
-                        <!-- <td>
-                            <input id="connect" type="button" onclick="connectServer()" value="连接">
-                        </td>
-                        <td>
-                            <input id="disconnect" type="button" onclick="disconnectServer()" disabled="true" value="断开">
-                        </td> -->
                     </tr>
                 </table>
             </td>
