@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>MUD WebClient</title>
+<!-- <script src="build/react.js"></script>
+<script src="build/react-dom.js"></script> -->
+<script src="ansi_up.js"></script>
+<style>
+    .divcss5-b{ margin-left:5px;overflow-y:scroll; overflow-x:scroll; fontSize:small; border:1px solid #BDBDBD; line-height:0.1; }
+</style>
+</head>
+<body>
+    <script type="text/javascript">
+
+        function binayUtf8ToString(buf, begin){
+          var i = 0;
+          var pos = 0;
+          var str ="";
+          var unicode = 0 ;
+          var flag = 0;
+          for (pos = begin; pos < buf.length;){
+            flag= buf[pos];
+            if ((flag >>>7) === 0 ) {
+              str+= String.fromCharCode(buf[pos]);
+              pos += 1;
+              
+            }
+            else if ((flag &0xFC) === 0xFC ){
+              unicode = (buf[pos] & 0x3) << 30;
+              unicode |= (buf[pos+1] & 0x3F) << 24; 
+              unicode |= (buf[pos+2] & 0x3F) << 18; 
+              unicode |= (buf[pos+3] & 0x3F) << 12; 
+              unicode |= (buf[pos+4] & 0x3F) << 6;
+              unicode |= (buf[pos+5] & 0x3F);
+              str+= String.fromCharCode(unicode) ;
+              pos += 6;
+              
+            }else if ((flag &0xF8) === 0xF8 ){
+              unicode = (buf[pos] & 0x7) << 24;
+              unicode |= (buf[pos+1] & 0x3F) << 18; 
+              unicode |= (buf[pos+2] & 0x3F) << 12; 
+              unicode |= (buf[pos+3] & 0x3F) << 6;
+              unicode |= (buf[pos+4] & 0x3F);
+              str+= String.fromCharCode(unicode) ;
+              pos += 5;
+              
+            }
+            else if ((flag &0xF0) === 0xF0 ){
+              unicode = (buf[pos] & 0xF) << 18;
+              unicode |= (buf[pos+1] & 0x3F) << 12; 
+              unicode |= (buf[pos+2] & 0x3F) << 6;
+              unicode |= (buf[pos+3] & 0x3F);
+              str+= String.fromCharCode(unicode) ;
+              pos += 4;
+              
+            }
+            
+            else if ((flag &0xE0) === 0xE0 ){
+              unicode = (buf[pos] & 0x1F) << 12;;
+              unicode |= (buf[pos+1] & 0x3F) << 6;
+              unicode |= (buf[pos+2] & 0x3F);
+              str+= String.fromCharCode(unicode) ;
+              pos += 3;
+              
+            }
+            else if ((flag &0xC0) === 0xC0 ){ //110
+              unicode = (buf[pos] & 0x3F) << 6;
+              unicode |= (buf[pos+1] & 0x3F);
+              str+= String.fromCharCode(unicode) ;
+              pos += 2;
+              
+            }
+            else{
+              str+= String.fromCharCode(buf[pos]);
+              pos += 1;
+            }
+         } 
+         return str;
+        }
+
+        var socket;
+        if (!window.WebSocket) {
+            window.WebSocket = window.MozWebSocket;
+        }
+
+        function ab2str(buf) {
+          return String.fromCharCode.apply(null, new Uint16Array(buf));
+        }
+
+        //上一次残留的信息还没换行
+        var lastMsg = ""
+
+        function connectServer() {
+            if (window.WebSocket) {
+                // socket = new WebSocket("ws://192.168.2.239:9997/pp");
+                socket = new WebSocket("ws://182.254.151.171:9997/pp");
+                socket.onmessage = function(event) {
+                    if(typeof(event.data)=="string") {
+                        var obj = eval('(' + event.data +')');
+                        if (typeof obj.func != 'undefined')
+                            writeToScreen('<span style="color: #006030;">RESPONSE: ' + obj.func+'</span>');
+                        writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
+                    } else {
+                        // console.debug(event.data)
+                        // console.debug(event.data.toString())
+                        var reader = new FileReader();
+                        reader.onload = function(evt){
+                            if(evt.target.readyState == FileReader.DONE){
+                                var data = new Uint8Array(evt.target.result);
+                                var data2 = lastMsg + binayUtf8ToString(data, 0)
+                                if (lastMsg != "") {
+                                    //移除上一个
+                                    output.removeChild(output.childNodes[output.childNodes.length-1])
+                                }
+                                var msgs = data2.split("\r\n")
+                                for (var i=0; i < msgs.length; i++) {
+                                    var msg = msgs[i].replace(/\s\s/g,'&nbsp;')
+                                    writeToScreenA('<span style="color: green; background-color: #000000; white-space:pre; font-family: SimSun;" >' + msg +'</span>');
+                                }
+                                if (data2.charAt(data2.length-1) == '\n' && data2.charAt(data2.length-2) == '\r') {
+                                    lastMsg = ""
+                                } else {
+                                    lastMsg = msgs[msgs.length-1]
+                                    if (lastMsg == "> " || lastMsg == ">") {
+                                      lastMsg = ""
+                                    }
+                                }
+                            }
+                        }
+                        reader.readAsArrayBuffer(event.data);
+                    }
+                };
+                socket.onopen = function(event) {
+                    writeToScreen("CONNECTED");
+                    // document.getElementById("connect").disabled=true;
+                    // document.getElementById("disconnect").disabled=false;
+                    socket.send("112.124.8.59:6666");//pm
+                };
+                socket.onclose = function(event) {                    
+                    writeToScreen("DISCONNECTED");
+                    // document.getElementById("connect").disabled=false;
+                    // document.getElementById("disconnect").disabled=true;
+                    connectServer();
+                };
+            } else {
+                alert("你的浏览器不支持websocket，使用火狐或者谷歌浏览器！");
+            }
+        }
+        // function disconnectServer() {
+        //     socket.close();
+        //     writeToScreen("DISCONNECTED");            
+        //     //document.getElementById("connect").disabled=false;
+        //     //document.getElementById("disconnect").disabled=true;
+        // }
+ 
+        function send(message) {
+            if (!window.WebSocket) {
+                return;
+            }
+            if (socket.readyState == WebSocket.OPEN) {
+                writeToScreenA('<span style="color: gray; background-color: #000000; white-space:pre; font-family: SimSun;" >' + message +'</span>');
+                socket.send(message);
+            } else {
+                alert("连接没有开启.");
+            }
+        }
+
+        function writeToScreen(message) {
+            var pre = document.createElement("p"); 
+            pre.style.wordWrap = "break-word"; 
+            // pre.style.wordBreak = "break-all"
+            pre.style.fontSize = "small";
+            pre.innerHTML = message; 
+            output.appendChild(pre); 
+            output.scrollTop = output.scrollHeight;
+        }
+        function writeToScreenA(message) {
+            var pre = document.createElement("p"); 
+            pre.style.wordWrap = "break-word"; 
+            // pre.style.wordBreak = "break-all"
+            pre.style.fontSize = "small";
+            var msg = ansi_up.ansi_to_html(message);
+            pre.innerHTML = msg//.replace(/\s/g, "&nbsp;")
+            output.appendChild(pre);
+            output.scrollTop = output.scrollHeight;
+        }
+        connectServer();        
+    </script>
+    <form onsubmit="return false;">
+        <table border="0">
+            <tr valign="top">
+                <td style="height:1000px;width:1200px;text-align:top;">
+                     <!-- <textarea id="responseText" style="width: 500px; height: 300px;"></textarea> -->
+                    <div id="output" class="divcss5-b" style="height:1000px; width: 1200px; background-color: #000000 "></div>
+                </td>
+            </tr>
+            <td>
+                <table>
+                    <tr>                        
+                        <td>
+                        <input type="text" size="50" name="message200" value="" onkeypress="if(event.keyCode==13) {send(this.value);this.setSelectionRange(0, this.value.length);return false;}" autofocus >
+                        </td>
+                        <td>
+                        <input
+                                type="button" value="发送"
+                                onclick="send(this.form.message200.value)">            
+                        </td>
+                        <td>
+                            <input type="button" onclick="javascript:document.getElementById('output').innerHTML=''" value="清空">
+                        </td>
+                        <!-- <td>
+                            <input id="connect" type="button" onclick="connectServer()" value="连接">
+                        </td>
+                        <td>
+                            <input id="disconnect" type="button" onclick="disconnectServer()" disabled="true" value="断开">
+                        </td> -->
+                    </tr>
+                </table>
+            </td>
+        </table>
+    </form>
+</body>
+</html>
+
