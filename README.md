@@ -18,13 +18,16 @@ $ [sudo] npm install -g webtelnet
 ## Usage
 
 ```bash
-# syntax: wtp <http-port> <telnet-port> [<telnet-host>]
 # by default, telnet-host is 127.0.0.1
+$ webtelnet <http-port> <telnet-port> [<telnet-host>]
+```
 
-# example:
-$ wtp 8080 23
+Example (map telnet port 23 to web port 8080):
+
+```bash
+$ webtelnet 8080 23
 ```
 
 ## Credits
 
-WebTelnet is created by Raymond Xie, published under MIT license.
+Created by Raymond Xie, published under MIT license.
