@@ -36,14 +36,15 @@
   <script src="main.js"></script>
   <script src="zh.lang.js"></script>
   <link rel="stylesheet" href="main.css"/>
-  <title>WebMUD</title>
+  <title>WebTelnet</title>
 </head>
 
 <body>
-<div id="output"></div>
-<input id='command' type="text" size="50" value="" autofocus >
-<button id='send'>发送</button>      
-<button id='clear'>清空</button>
+  <div id="page">
+    <div id="output"></div>
+    <div id="cmd">
+      <input id='cmd' type="text" value="" autofocus><button id='send' class='cmd I18N' i18n='send'>Send</button><button id='clear' class='cmd I18N' i18n='clear'>Clear</button>
+    </div>
+  </div>
 </body>
 </html>
-

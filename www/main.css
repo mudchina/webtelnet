@@ -1,20 +1,34 @@
+body, div#page {
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  background-color: black;
+}
+
 div#output { 
   margin: 0px;
-  width: 800px;
-  height: 800px;
-  overflow-y: scroll; 
-  overflow-x: scroll; 
-  font-size: 18px; 
+  padding: 0px;
+  overflow-y: scroll;
+  overflow-x: scroll;
   line-height: 100%;
-  border: 1px solid black; 
+  border: 1px solid gray; 
   background-color: black;
+}
+
+div#cmd {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
 }
 
 span.output {
   white-space:pre; 
   font-family: SimSun;
   color: green; 
-  background-color: black; 
 }
 
 p {
@@ -25,5 +39,16 @@ span.cmd {
   white-space:pre; 
   font-family: SimSun;
   color: white; 
-  background-color: black; 
+}
+
+input#cmd {
+  font-size: 18px;
+  padding: 5px;
+}
+
+button.cmd {
+  font-size: 18px;
+  width: 80px;
+  padding: 7px;
+  margin: 1px;
 }

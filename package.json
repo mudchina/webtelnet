@@ -1,7 +1,7 @@
 {
   "name": "webtelnet",
-  "version": "0.1.0",
-  "description": "web to telnet bridge/proxy, enable playing MUD game with broswer",
+  "version": "0.9.0",
+  "description": "webtelnet, a web to telnet proxy, enable browser visiting telnet servers",
   "main": "./src/webtelnet.js",
   "bin": {
     "webtelnet": "./src/main.js"
@@ -20,10 +20,11 @@
   "keywords": [
     "telnet",
     "webtelnet",
+    "proxy",
     "mud",
     "webmud"
   ],
-  "author": "Raymond Xie",
+  "author": "Raymond Xie <rjfun.mobile@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mudchina/webtelnet/issues"

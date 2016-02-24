@@ -71,8 +71,6 @@ function ab2str(buf) {
 function writeToScreen(message) {
     var pre = document.createElement("p"); 
     pre.style.wordWrap = "break-word"; 
-    // pre.style.wordBreak = "break-all"
-    // pre.style.fontSize = "small";
     pre.innerHTML = message; 
     output.appendChild(pre); 
     output.scrollTop = output.scrollHeight;
@@ -81,8 +79,6 @@ function writeToScreen(message) {
 function writeToScreenA(message) {
     var pre = document.createElement("p"); 
     pre.style.wordWrap = "break-word"; 
-    // pre.style.wordBreak = "break-all"
-    // pre.style.fontSize = "small";
     var msg = ansi_up.ansi_to_html(message);
     pre.innerHTML = msg//.replace(/\s/g, "&nbsp;")
     output.appendChild(pre);
@@ -95,7 +91,6 @@ function writeServerDataToScreen(msg) {
   var data = new Uint8Array(msg);
   var data2 = lastMsg + binayUtf8ToString(data, 0)
   if (lastMsg != "") {
-      //移除上一个
       output.removeChild(output.childNodes[output.childNodes.length-1])
   }
   var msgs = data2.split("\r\n")
@@ -114,6 +109,21 @@ function writeServerDataToScreen(msg) {
   }
 }
 
+function adjustLayout() {
+  var w = $(window).width(), h = $(window).height();
+  var w0 = $('div#cmd').width();
+  var w1 = $('button#send').outerWidth(true);
+  var w2 = $('button#clear').outerWidth(true);
+  $('input#cmd').css({
+    width: (w0 - (w1+w2+14)) + 'px',
+  });
+  var h0 = $('div#cmd').outerHeight(true);
+  $('div#output').css({
+    width: (w-2) + 'px',
+    height: (h - h0 -2) + 'px',
+  });
+}
+
 var sock = null;
 
 function send(message) {
@@ -121,11 +131,15 @@ function send(message) {
   if(sock) sock.emit('message', message);
 }
 
-$(document).ready(function(){
-  sock = io.connect();
+$(window).resize(adjustLayout);
 
+$(document).ready(function(){
+  $.cookie('lang', 'zh');
+  hotjs.i18n.setLang('zh');
+  hotjs.i18n.translate();
+
+  sock = io.connect();
   sock.on('message', function(msg){
-    console.log(msg.toString());
     writeServerDataToScreen(msg);
   });
 
@@ -139,18 +153,22 @@ $(document).ready(function(){
   });
 
   $('button#send').click(function(e) {
-    var str = $('input#command').val();
+    var str = $('input#cmd').val();
     send(str + '\n');
   });
   $('button#clear').click(function(e) {
     $('div#output').html('');
   });
-  $('input#command').keypress(function(e) {
+  $('input#cmd').keypress(function(e) {
     if(e.keyCode == 13) {
-      var str = $('input#command').val();
+      var str = $('input#cmd').val();
       send(str + '\n');
       var me = e.currentTarget;
       me.setSelectionRange(0, str.length);
     }
   });
+
+  setTimeout(function(){
+    adjustLayout();
+  },100)
 });

@@ -90,7 +90,7 @@ var WebTelnetProxy = Class({
     var proxy = this;
 
     if(proxy.conf.logTraffic) {
-      console.log('client connected, socket id: ' + webSock.id);
+      console.log('web client connected, socket id: ' + webSock.id);
       webSock.logTraffic = 1;
     }
     
@@ -119,6 +119,7 @@ var WebTelnetProxy = Class({
     telnet.on('error', function(){
     });
     telnet.on('close', function(){
+      console.log('telnet disconnected');
     });
     telnet.on('end', function(){
       var peerSock = telnet.peerSock;
@@ -137,6 +138,7 @@ var WebTelnetProxy = Class({
       }
     });
     webSock.on('disconnect', function(){
+      console.log('web client disconnected, socket id: ' + webSock.id);
       proxy.onDisconnected(webSock);
     });
 

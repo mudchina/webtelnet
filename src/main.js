@@ -5,23 +5,29 @@
 var conf = {
   telnet: {
     host: '127.0.0.1',
-    port: 4000,
+    port: 23,
   },
   web: {
     host: '0.0.0.0',
-    port: 8000,
+    port: 8080,
   },
   www: __dirname + '/../www',
   logTraffic: true,
 };
 
-var args = require('minimist')(process.argv.slice(2));
+var argv = process.argv;
+var me = argv[1];
+var args = require('minimist')(argv.slice(2));
 
-if(args.p) conf.web.port = args.p;
-if(args.h) conf.web.host = args.h;
+if(args._.length < 2) {
+  process.stdout.write('Argument required.\nSyntax: webtelnet <http-port> <telnet-port> [<telnet-host>]\n\n');
+  process.exit(1);
+}
 
-if(args.mp) conf.telnet.port = args.mp;
-if(args.mh) conf.telnet.host = args.mh;
+conf.web.port = parseInt(args._[0], 10);
+
+conf.telnet.port = parseInt(args._[1], 10);
+if(args._.length > 2) conf.telnet.host = args._[2];
 
 var WebTelnetProxy = require('./webtelnet.js');
 
