@@ -1,6 +1,6 @@
 # WebTelnet
 
-WebTelnet is a proxy server to bridge websocket to telnet.
+WebTelnet is a proxy server to bridge websocket to telnet, enable visiting telnet servers with browsers.
 
 ## Purpose
 
