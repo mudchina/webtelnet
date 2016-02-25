@@ -18,16 +18,21 @@ $ [sudo] npm install -g webtelnet
 ## Usage
 
 ```bash
-# by default, telnet-host is 127.0.0.1
-$ webtelnet <http-port> <telnet-port> [<telnet-host>]
+$ webtelnet <http-port> <telnet-port> [-h <telnet-host>] [-w <path/to/www>]
 ```
 
-Example:
+* By default, telnet-host is 127.0.0.1. You can also proxy to other hosts.
+* By default, path/to/www point to WebTelnet web app. You can use customized web app, for example, a web app optimized for specific MUD.
 
-Assuming you have a MUD server running at port 4000, to map it to http port 8080:
+Example, if you have a MUD server listening on port 4000, to map to http port 8080:
 
 ```bash
 $ webtelnet 8080 4000
+```
+
+Or run it with forever,
+```bash
+$ forever start `which webtelnet` 8080 4000 -w ./es2/www
 ```
 
 Then, use a browser to visit the web: http://your-host:8080/
