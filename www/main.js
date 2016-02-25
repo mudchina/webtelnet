@@ -68,44 +68,28 @@ function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint16Array(buf));
 }
 
-function writeToScreen(message) {
-    var pre = document.createElement("p"); 
-    pre.style.wordWrap = "break-word"; 
-    pre.innerHTML = message; 
-    output.appendChild(pre); 
-    output.scrollTop = output.scrollHeight;
+function writeToScreen(str) {
+  var out = $('div#out');
+  out.append('<span class="out">' + str + '</span>');
+  out.scrollTop(out.prop("scrollHeight"));
 }
 
-function writeToScreenA(message) {
-    var pre = document.createElement("p"); 
-    pre.style.wordWrap = "break-word"; 
-    var msg = ansi_up.ansi_to_html(message);
-    pre.innerHTML = msg//.replace(/\s/g, "&nbsp;")
-    output.appendChild(pre);
-    output.scrollTop = output.scrollHeight;
-}
+function writeServerData(buf) {
+  var data = new Uint8Array(buf);
+  var str = binayUtf8ToString(data, 0);
 
-var lastMsg = ""
+  var lines = str.split('\r\n');
+  for(var i=0; i<lines.length; i++) {
+    var line = lines[i].replace(/\s/g, '&nbsp;');
+    if(i < lines.length-1) line += '<br/>';
 
-function writeServerDataToScreen(msg) {
-  var data = new Uint8Array(msg);
-  var data2 = lastMsg + binayUtf8ToString(data, 0)
-  if (lastMsg != "") {
-      output.removeChild(output.childNodes[output.childNodes.length-1])
-  }
-  var msgs = data2.split("\r\n")
-  for (var i=0; i < msgs.length; i++) {
-      var msg = msgs[i].replace(/\s\s/g,'&nbsp;')
-      if(!msg) msg = '&nbsp;';
-      writeToScreenA('<span class="output">' + msg +'</span>');
-  }
-  if (data2.charAt(data2.length-1) == '\n' && data2.charAt(data2.length-2) == '\r') {
-      lastMsg = ""
-  } else {
-      lastMsg = msgs[msgs.length-1]
-      if (lastMsg == "> " || lastMsg == ">") {
-        lastMsg = ""
-      }
+    // replace the prompt "> " with a empty line
+    var len = line.length;
+    if(len>=2 && line.substr(len-2) == '> ') line = line.substr(0, line-2) + '<br/>';
+
+    line = ansi_up.ansi_to_html(line);
+
+    writeToScreen(line);
   }
 }
 
@@ -118,17 +102,10 @@ function adjustLayout() {
     width: (w0 - (w1+w2+14)) + 'px',
   });
   var h0 = $('div#cmd').outerHeight(true);
-  $('div#output').css({
+  $('div#out').css({
     width: (w-2) + 'px',
     height: (h - h0 -2) + 'px',
   });
-}
-
-var sock = null;
-
-function send(message) {
-  writeToScreenA('<span class="cmd">' + message +'</span>');
-  if(sock) sock.emit('message', message);
 }
 
 $(window).resize(adjustLayout);
@@ -138,37 +115,44 @@ $(document).ready(function(){
   //hotjs.i18n.setLang('zh');
   //hotjs.i18n.translate();
 
-  sock = io.connect();
-  sock.on('message', function(msg){
-    writeServerDataToScreen(msg);
+  // websocket
+  var sock = io.connect();
+  sock.on('data', function(buf){
+    writeServerData(buf);
   });
-
+  sock.on('status', function(str){
+    writeToScreen(str);
+  });
   sock.on('connected', function(){
     console.log('connected');
-    writeToScreen("CONNECTED");
   });
   sock.on('disconnect', function(){
     console.log('disconnected');
-    writeToScreen("DISCONNECTED");
   });
 
+  // send
+  var send = function(str) {
+    writeToScreen(str);
+    if(sock) sock.emit('data', str);
+  }
+  var sendInput = function() {
+    var cmd = $('input#cmd');
+    send(cmd.val().trim() + '\n');
+    cmd.val('');
+  }
+
+  // UI events
+  $('input#cmd').keypress(function(e) {
+    if(e.keyCode == 13) sendInput();
+  });
   $('button#send').click(function(e) {
-    var str = $('input#cmd').val();
-    send(str + '\n');
+    sendInput();
   });
   $('button#clear').click(function(e) {
-    $('div#output').html('');
-  });
-  $('input#cmd').keypress(function(e) {
-    if(e.keyCode == 13) {
-      var str = $('input#cmd').val();
-      send(str + '\n');
-      var me = e.currentTarget;
-      me.setSelectionRange(0, str.length);
-    }
+    $('div#out').html('');
   });
 
   setTimeout(function(){
     adjustLayout();
-  },100)
+  },200)
 });

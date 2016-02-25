@@ -86,19 +86,13 @@ var WebTelnetProxy = Class({
     proxy.socketsCount --;
   },
 
-  onConnected: function(webSock) {
+  connectTelnet: function(webSock) {
     var proxy = this;
 
-    if(proxy.conf.logTraffic) {
-      console.log('web client connected, socket id: ' + webSock.id);
-      webSock.logTraffic = 1;
-    }
-    
-    var telnet = net.connect(
-      proxy.conf.telnet.port,
-      proxy.conf.telnet.host,
-      function() {
-      console.log('connected to telnet server');
+    webSock.emit('status', 'connecting telnet ... ');
+    var telnet = net.connect( proxy.conf.telnet.port, proxy.conf.telnet.host, function() {
+      console.log('telnet connected');
+      webSock.emit('status', 'telnet connected.\n');
     });
 
     telnet.peerSock = webSock;
@@ -113,30 +107,42 @@ var WebTelnetProxy = Class({
         for(var i=0; i<buf.length; ++i) {
           view[i] = buf[i];
         }
-        peerSock.emit('message', arrBuf);
+        peerSock.emit('data', arrBuf);
       }
     });
     telnet.on('error', function(){
     });
     telnet.on('close', function(){
       console.log('telnet disconnected');
+      webSock.emit('status', 'telnet disconnected.\n');
     });
     telnet.on('end', function(){
       var peerSock = telnet.peerSock;
       if(peerSock) {
-        peerSock.disconnect();
-        proxy.onDisconnected(peerSock);
+        peerSock.peerSock = null;
         telnet.peerSock = null;
       }
     });
+  },
 
-    webSock.on('message', function(message) {
+  onConnected: function(webSock) {
+    var proxy = this;
+
+    if(proxy.conf.logTraffic) {
+      console.log('web client connected, socket id: ' + webSock.id);
+      webSock.logTraffic = 1;
+    }
+
+    webSock.on('data', function(message) {
       //console.log('websocket: ', message);
       var peerSock = webSock.peerSock;
       if(peerSock) {
         peerSock.write(message);
+      } else {
+        proxy.connectTelnet(webSock);
       }
     });
+
     webSock.on('disconnect', function(){
       console.log('web client disconnected, socket id: ' + webSock.id);
       proxy.onDisconnected(webSock);
@@ -144,6 +150,8 @@ var WebTelnetProxy = Class({
 
     proxy.sockets[webSock.id] = webSock;
     proxy.socketsCount ++;
+
+    proxy.connectTelnet(webSock);
   },
 });
 
