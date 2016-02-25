@@ -32,7 +32,7 @@ $ webtelnet 8080 4000
 
 Or run it with forever,
 ```bash
-$ forever start `which webtelnet` 8080 4000 -w ./es2/www
+$ forever start `which webtelnet` 8080 4000 -w /home/liming/es2-mudlib/www
 ```
 
 Then, use a browser to visit the web: http://your-host:8080/
