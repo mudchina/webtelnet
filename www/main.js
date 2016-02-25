@@ -80,7 +80,7 @@ function writeServerData(buf) {
 
   var lines = str.split('\r\n');
   for(var i=0; i<lines.length; i++) {
-    var line = lines[i].replace(/\s/g, '&nbsp;');
+    var line = lines[i].replace(/\s\s/g, '&nbsp;');
     if(i < lines.length-1) line += '<br/>';
 
     // replace the prompt "> " with a empty line

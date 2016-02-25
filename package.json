@@ -1,6 +1,6 @@
 {
   "name": "webtelnet",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "WebTelnet is a proxy server to bridge websocket to telnet, enable visiting telnet servers with browsers",
   "main": "./src/webtelnet.js",
   "bin": {
