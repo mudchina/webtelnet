@@ -134,9 +134,9 @@ function send(message) {
 $(window).resize(adjustLayout);
 
 $(document).ready(function(){
-  $.cookie('lang', 'zh');
-  hotjs.i18n.setLang('zh');
-  hotjs.i18n.translate();
+  //$.cookie('lang', 'zh');
+  //hotjs.i18n.setLang('zh');
+  //hotjs.i18n.translate();
 
   sock = io.connect();
   sock.on('message', function(msg){

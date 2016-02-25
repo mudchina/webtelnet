@@ -22,11 +22,25 @@ $ [sudo] npm install -g webtelnet
 $ webtelnet <http-port> <telnet-port> [<telnet-host>]
 ```
 
-Example (map telnet port 23 to web port 8080):
+Example:
+
+Assuming you have a MUD server running at port 4000, to map it to http port 8080:
 
 ```bash
-$ webtelnet 8080 23
+$ webtelnet 8080 4000
 ```
+
+Then, use a browser to visit the web: http://your-host:8080/
+
+## Screenshot
+
+Playing MUD with PC broswer:
+
+![webmud-pc](https://github.com/mudchina/webtelnet/tree/master/docs/webmud-pc.jpg)
+
+Playing MUD with mobile broswer on iPhone6:
+
+![webmud-mobile](https://github.com/mudchina/webtelnet/tree/master/docs/webmud-ios.jpg)
 
 ## Credits
 
