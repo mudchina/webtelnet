@@ -36,11 +36,11 @@ Then, use a browser to visit the web: http://your-host:8080/
 
 Playing MUD with PC broswer:
 
-![webmud-pc](https://github.com/mudchina/webtelnet/tree/master/docs/webmud-pc.jpg)
+![webmud-pc](https://github.com/mudchina/webtelnet/raw/master/docs/webmud-pc.jpg)
 
 Playing MUD with mobile broswer on iPhone6:
 
-![webmud-mobile](https://github.com/mudchina/webtelnet/tree/master/docs/webmud-ios.jpg)
+![webmud-mobile](https://github.com/mudchina/webtelnet/raw/master/docs/webmud-ios.jpg)
 
 ## Credits
 
