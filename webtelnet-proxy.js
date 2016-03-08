@@ -1,45 +1,52 @@
 'use strict';
 
-var socketio = require('socket.io'),
-  express = require('express'),
-  http = require('http'),
-  net = require('net'),
-  Class = require('mixin-pro').createClass;
+(function(){
 
-var WebTelnetProxy = Class({
-  constructor: function WebTelnetProxy( conf ) {
-    this.conf = conf;
-    this.DROP_KICK_TIME = 30; // 30 sec
+var net = require('net');
+
+function WebTelnetProxy(io, port, host) {
+  if(this && (this instanceof WebTelnetProxy)) {
     this.reset();
-  },
+    if(io) this.bind(io, port, host);
+  } else {
+    return new WebTelnetProxy(io, port, host);
+  }
+}
 
+WebTelnetProxy.prototype = {
   reset: function() {
     this.io = null;
-    this.timer = 0;
+    this.logTraffic = false;
+
     this.isRunning = false;
+    this.timer = 0;
+    this.lastTick = 0;
+
     this.sockets = {};  // sid -> socket
     this.socketsCount = 0;
+    
+    this.port = 23;
+    this.host = '127.0.0.1';
   },
 
-  startup: function() {
-    if(this.isRunning) throw new Error('server is already running.');
+  showTraffic: function(y) {
+    this.logTraffic = y;
+  },
+
+  bind: function(io, port, host) {
+    if(this.isRunning) throw new Error('WebTelnetProxy is already running.');
 
     var proxy = this;
-    var conf = this.conf;
-    var now = Date.now();
+    proxy.io = io;
+    proxy.port = port;
+    proxy.host = host;
 
-    // init network listener
-    var app = express().use(express.static(conf.www));
-    var httpserver = http.createServer(app);
-    var io = this.io = socketio.listen(httpserver);
     io.on('connection', function(sock){
       proxy.onConnected(sock);
     });
-    httpserver.listen(conf.web.port, conf.web.host, function(){
-      console.log('listening on ' + conf.web.host + ':' + conf.web.port);
-    });
 
-    this.isRunning = true;
+    proxy.lastTick = Date.now();
+    proxy.isRunning = true;
 
     // init tick() timer
     proxy.tick();
@@ -56,22 +63,14 @@ var WebTelnetProxy = Class({
     // clear tick() timer
     if(this.timer) clearInterval(this.timer);
 
-    // close socket connection
-    if(this.io) this.io.close();
-
-    // close all connections
-    var sockets = this.sockets;
-    for(var j in sockets) {
-      sockets[j].disconnect();
-      delete sockets[j];
-    }
-
     this.reset();
+
+    return this;
   },
 
   tick: function() {
-    var self = this;
-    var now = Date.now();
+    var server = this;
+    server.lastTick = Date.now();
   },
 
   onDisconnected: function(webSock) {
@@ -89,10 +88,9 @@ var WebTelnetProxy = Class({
   connectTelnet: function(webSock) {
     var proxy = this;
 
-    webSock.emit('status', 'connecting telnet ... ');
-    var telnet = net.connect( proxy.conf.telnet.port, proxy.conf.telnet.host, function() {
-      console.log('telnet connected');
-      webSock.emit('status', 'telnet connected.\n');
+    var telnet = net.connect( proxy.port, proxy.host, function() {
+      if(proxy.logTraffic) console.log('telnet connected');
+      webSock.emit('status', 'Telnet connected.\n');
     });
 
     telnet.peerSock = webSock;
@@ -107,14 +105,14 @@ var WebTelnetProxy = Class({
         for(var i=0; i<buf.length; ++i) {
           view[i] = buf[i];
         }
-        peerSock.emit('data', arrBuf);
+        peerSock.emit('stream', arrBuf);
       }
     });
     telnet.on('error', function(){
     });
     telnet.on('close', function(){
-      console.log('telnet disconnected');
-      webSock.emit('status', 'telnet disconnected.\n');
+      if(proxy.logTraffic) console.log('telnet disconnected');
+      webSock.emit('status', 'Telnet disconnected.\n');
     });
     telnet.on('end', function(){
       var peerSock = telnet.peerSock;
@@ -128,12 +126,8 @@ var WebTelnetProxy = Class({
   onConnected: function(webSock) {
     var proxy = this;
 
-    if(proxy.conf.logTraffic) {
-      console.log('web client connected, socket id: ' + webSock.id);
-      webSock.logTraffic = 1;
-    }
-
-    webSock.on('data', function(message) {
+    if(proxy.logTraffic) console.log('proxy client connected, socket id: ' + webSock.id);
+    webSock.on('stream', function(message) {
       //console.log('websocket: ', message);
       var peerSock = webSock.peerSock;
       if(peerSock) {
@@ -144,19 +138,15 @@ var WebTelnetProxy = Class({
     });
 
     webSock.on('disconnect', function(){
-      console.log('web client disconnected, socket id: ' + webSock.id);
+      if(proxy.logTraffic) console.log('proxy client disconnected, socket id: ' + webSock.id);
       proxy.onDisconnected(webSock);
     });
 
     proxy.sockets[webSock.id] = webSock;
     proxy.socketsCount ++;
-
-    proxy.connectTelnet(webSock);
   },
-});
-
-WebTelnetProxy.startProxy = function(conf) {
-  return new WebTelnetProxy(conf).startup();
-}
+};
 
 exports = module.exports = WebTelnetProxy;
+
+})();

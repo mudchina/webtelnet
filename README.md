@@ -11,11 +11,33 @@ WebTelnet can be used to:
 
 ## Install
 
+## Usage programatically
+
+In your project folder:
+
+```bash
+$ [sudo] npm install webtelnet --save
+```
+
+```javascript
+var app = express().use(express.static(conf.www));
+var httpserver = http.createServer(app);
+httpserver.listen(conf.web.port, conf.web.host, function(){
+  console.log('listening on ' + conf.web.host + ':' + conf.web.port);
+});
+
+// create socket io
+var io = socketio.listen(httpserver);
+
+// create webtelnet proxy and bind to io
+var webtelnetd = webtelnet(io, conf.telnet.port, conf.telnet.host);
+```
+
+## Usage as standalone proxy
+
 ```bash
 $ [sudo] npm install -g webtelnet
 ```
-
-## Usage
 
 ```bash
 $ webtelnet <http-port> <telnet-port> [-h <telnet-host>] [-w <path/to/www>]

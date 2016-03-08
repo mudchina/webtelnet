@@ -111,13 +111,9 @@ function adjustLayout() {
 $(window).resize(adjustLayout);
 
 $(document).ready(function(){
-  //$.cookie('lang', 'zh');
-  //hotjs.i18n.setLang('zh');
-  //hotjs.i18n.translate();
-
   // websocket
   var sock = io.connect();
-  sock.on('data', function(buf){
+  sock.on('stream', function(buf){
     writeServerData(buf);
   });
   sock.on('status', function(str){
@@ -133,7 +129,7 @@ $(document).ready(function(){
   // send
   var send = function(str) {
     writeToScreen(str);
-    if(sock) sock.emit('data', str);
+    if(sock) sock.emit('stream', str);
   }
   var sendInput = function() {
     var cmd = $('input#cmd');
@@ -154,5 +150,7 @@ $(document).ready(function(){
 
   setTimeout(function(){
     adjustLayout();
+    
+    send('\n');
   },200)
 });
