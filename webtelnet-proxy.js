@@ -3,7 +3,8 @@
 (function(){
 
 var net = require('net'),
-    iconv = require('iconv-lite');
+    iconv = require('iconv-lite'),
+    TextDecoder = require('text-encoding').TextDecoder;
 
   // string to uint array
 function unicodeStringToTypedArray(s) {
@@ -56,7 +57,7 @@ WebTelnetProxy.prototype = {
     
     this.port = 23;
     this.host = '127.0.0.1';
-    this.charset = '';
+    this.decoder = new TextDecoder('utf-8');
     return this;
   },
 
@@ -67,6 +68,7 @@ WebTelnetProxy.prototype = {
 
   setCharset: function(cs) {
     this.charset = cs;
+    this.decoder = new TextDecoder(cs);
     return this;
   },
 
@@ -137,9 +139,10 @@ WebTelnetProxy.prototype = {
       //console.log('telnet: ', buf.toString());
       var peerSock = telnet.peerSock;
       if(peerSock) {
+        peerSock.emit('stream', proxy.decoder.decode(buf));
+/*
         if(proxy.charset && (proxy.charset !== 'utf8')) {
           buf = iconv.decode(buf, proxy.charset);
-          console.log(buf);
           buf = unicodeStringToTypedArray(buf);
         }
         var arrBuf = new ArrayBuffer(buf.length);
@@ -148,6 +151,7 @@ WebTelnetProxy.prototype = {
           view[i] = buf[i];
         }
         peerSock.emit('stream', arrBuf);
+*/
       }
     });
     telnet.on('error', function(){

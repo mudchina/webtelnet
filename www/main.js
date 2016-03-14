@@ -1,3 +1,38 @@
+/*
+function Utf8ArrayToStr(array) {
+    var out, i, len, c;
+    var char2, char3;
+
+    out = "";
+    len = array.length;
+    i = 0;
+    while(i < len) {
+    c = array[i++];
+    switch(c >> 4)
+    { 
+      case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+        // 0xxxxxxx
+        out += String.fromCharCode(c);
+        break;
+      case 12: case 13:
+        // 110x xxxx   10xx xxxx
+        char2 = array[i++];
+        out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+        break;
+      case 14:
+        // 1110 xxxx  10xx xxxx  10xx xxxx
+        char2 = array[i++];
+        char3 = array[i++];
+        out += String.fromCharCode(((c & 0x0F) << 12) |
+                       ((char2 & 0x3F) << 6) |
+                       ((char3 & 0x3F) << 0));
+        break;
+    }
+    }
+
+    return out;
+}
+
 function binayUtf8ToString(buf, begin){
   var i = 0;
   var pos = 0;
@@ -63,10 +98,7 @@ function binayUtf8ToString(buf, begin){
  } 
  return str;
 }
-
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint16Array(buf));
-}
+*/
 
 function writeToScreen(str) {
   var out = $('div#out');
@@ -75,8 +107,10 @@ function writeToScreen(str) {
 }
 
 function writeServerData(buf) {
-  var data = new Uint8Array(buf);
-  var str = binayUtf8ToString(data, 0);
+  // now we send utf8 string instead of utf8 array
+  // var data = new Uint8Array(buf);
+  // var str = binayUtf8ToString(data, 0);
+  var str = buf;
 
   var lines = str.split('\r\n');
   for(var i=0; i<lines.length; i++) {
