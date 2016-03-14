@@ -1,6 +1,6 @@
 {
   "name": "webtelnet",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "WebTelnet is a proxy server to bridge websocket to telnet, enable visiting telnet servers with browsers",
   "main": "./webtelnet-proxy.js",
   "bin": {
@@ -20,17 +20,20 @@
     "mud",
     "webmud"
   ],
-  "author": "Raymond Xie <rjfun.mobile@gmail.com>",
+  "author": {
+    "name": "Raymond Xie",
+    "email": "rjfun.mobile@gmail.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mudchina/webtelnet/issues"
   },
   "homepage": "https://github.com/mudchina/webtelnet#README.md",
   "dependencies": {
-    "minimist": "^1.2.0",
     "express": "^4.13.4",
+    "iconv-lite": "^0.4.13",
+    "minimist": "^1.2.0",
     "socket.io": "^1.4.4"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

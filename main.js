@@ -34,7 +34,9 @@ if(args._.length < 2) {
     'Syntax: webtelnet <http-port> <telnet-port> [options]\n' +
     'Options: \n' +
     '    [-h <telnet-host>]\n' +
-    '    [-w <path/to/www>]\n' );
+    '    [-w <path/to/www>]\n' +
+    '    [-c <charset>]\n'
+  );
   process.exit(0);
 }
 
@@ -55,3 +57,4 @@ var io = socketio.listen(httpserver);
 
 // create webtelnet proxy and bind to io
 var webtelnetd = webtelnet(io, conf.telnet.port, conf.telnet.host);
+if(args.c) webtelnetd.setCharset(args.c);

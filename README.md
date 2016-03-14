@@ -31,6 +31,9 @@ var io = socketio.listen(httpserver);
 
 // create webtelnet proxy and bind to io
 var webtelnetd = webtelnet(io, conf.telnet.port, conf.telnet.host);
+
+// if you need charset conversion from gbk to utf8
+webtelnetd.setCharset('gbk');
 ```
 
 ## Usage as standalone proxy
@@ -40,11 +43,12 @@ $ [sudo] npm install -g webtelnet
 ```
 
 ```bash
-$ webtelnet <http-port> <telnet-port> [-h <telnet-host>] [-w <path/to/www>]
+$ webtelnet <http-port> <telnet-port> [-h <telnet-host>] [-w <path/to/www>] ［－c <charset>]
 ```
 
 * By default, telnet-host is 127.0.0.1. You can also proxy to other hosts.
 * By default, path/to/www point to WebTelnet web app. You can use customized web app, for example, a web app optimized for specific MUD.
+* By default, charset is utf8. You can try gbk or big5, if you need charset conversion.
 
 Example, if you have a MUD server listening on port 4000, to map to http port 8080:
 

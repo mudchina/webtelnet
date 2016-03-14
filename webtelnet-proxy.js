@@ -2,7 +2,36 @@
 
 (function(){
 
-var net = require('net');
+var net = require('net'),
+    iconv = require('iconv-lite');
+
+  // string to uint array
+function unicodeStringToTypedArray(s) {
+    var escstr = encodeURIComponent(s);
+    var binstr = escstr.replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    });
+    var ua = new Uint8Array(binstr.length);
+    Array.prototype.forEach.call(binstr, function (ch, i) {
+        ua[i] = ch.charCodeAt(0);
+    });
+    return ua;
+}
+
+// uint array to string
+function typedArrayToUnicodeString(ua) {
+    var binstr = Array.prototype.map.call(ua, function (ch) {
+        return String.fromCharCode(ch);
+    }).join('');
+    var escstr = binstr.replace(/(.)/g, function (m, p) {
+        var code = p.charCodeAt(p).toString(16).toUpperCase();
+        if (code.length < 2) {
+            code = '0' + code;
+        }
+        return '%' + code;
+    });
+    return decodeURIComponent(escstr);
+}
 
 function WebTelnetProxy(io, port, host) {
   if(this && (this instanceof WebTelnetProxy)) {
@@ -27,10 +56,18 @@ WebTelnetProxy.prototype = {
     
     this.port = 23;
     this.host = '127.0.0.1';
+    this.charset = '';
+    return this;
   },
 
   showTraffic: function(y) {
     this.logTraffic = y;
+    return this;
+  },
+
+  setCharset: function(cs) {
+    this.charset = cs;
+    return this;
   },
 
   bind: function(io, port, host) {
@@ -100,6 +137,11 @@ WebTelnetProxy.prototype = {
       //console.log('telnet: ', buf.toString());
       var peerSock = telnet.peerSock;
       if(peerSock) {
+        if(proxy.charset && (proxy.charset !== 'utf8')) {
+          buf = iconv.decode(buf, proxy.charset);
+          console.log(buf);
+          buf = unicodeStringToTypedArray(buf);
+        }
         var arrBuf = new ArrayBuffer(buf.length);
         var view = new Uint8Array(arrBuf);
         for(var i=0; i<buf.length; ++i) {
@@ -128,6 +170,9 @@ WebTelnetProxy.prototype = {
 
     if(proxy.logTraffic) console.log('proxy client connected, socket id: ' + webSock.id);
     webSock.on('stream', function(message) {
+      if(proxy.charset && (proxy.charset !== 'utf8')) {
+        message = iconv.encode(message, proxy.charset);
+      }
       //console.log('websocket: ', message);
       var peerSock = webSock.peerSock;
       if(peerSock) {
